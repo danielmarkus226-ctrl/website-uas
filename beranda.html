@@ -1,0 +1,482 @@
+<!doctype html>
+<html lang="id" class="h-full">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>E-learning UNPAM</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="/_sdk/element_sdk.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
+  <style>
+    body {
+      box-sizing: border-box;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+    }
+    
+    .course-card {
+      transition: all 0.3s ease;
+    }
+    
+    .course-card:hover {
+      transform: translateY(-8px);
+    }
+    
+    .course-icon {
+      transition: transform 0.3s ease;
+    }
+    
+    .course-card:hover .course-icon {
+      transform: scale(1.1);
+    }
+  </style>
+  <style>@view-transition { navigation: auto; }</style>
+  <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
+ </head>
+ <body class="h-full">
+  <div id="app" class="w-full h-full overflow-auto"></div>
+  <script>
+    const defaultConfig = {
+      background_color: '#0f172a',
+      surface_color: '#1e293b',
+      text_color: '#f1f5f9',
+      primary_action_color: '#3b82f6',
+      secondary_action_color: '#64748b',
+      font_family: 'Plus Jakarta Sans',
+      font_size: 16,
+      page_title: 'E-learning UNPAM',
+      page_subtitle: 'Semester Ganjil 2025/2026',
+      course_1_name: 'Kecerdasan Buatan',
+      course_2_name: 'Sistem Informasi Manajemen',
+      course_3_name: 'Pengolahan Citra Digital',
+      course_4_name: 'Teknik Riset Operasional',
+      course_5_name: 'Pemrograman Web I',
+      course_6_name: 'Metode Penelitian',
+      course_7_name: 'Digital Entrepreneurship',
+      course_8_name: 'Machine Learning'
+    };
+
+    let currentView = 'home'; // 'home' or 'detail'
+    let selectedCourseIndex = -1;
+
+    const courseIcons = [
+      '<svg class="course-icon" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>',
+      '<svg class="course-icon" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="12" cy="5" rx="9" ry="3"></ellipse><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"></path><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"></path></svg>',
+      '<svg class="course-icon" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>',
+      '<svg class="course-icon" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path></svg>',
+      '<svg class="course-icon" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>',
+      '<svg class="course-icon" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="6"></circle><circle cx="12" cy="12" r="2"></circle></svg>',
+      '<svg class="course-icon" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>',
+      '<svg class="course-icon" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg>'
+    ];
+
+    const meetingTopics = [
+      'Pengenalan dan Konsep Dasar',
+      'Teori Fundamental',
+      'Implementasi Praktis',
+      'Studi Kasus 1',
+      'Teknik Lanjutan 1',
+      'Penerapan di Industri',
+      'Review dan Latihan',
+      'Ujian Tengah Semester',
+      'Teknik Lanjutan 2',
+      'Studi Kasus 2',
+      'Proyek Kelompok',
+      'Optimasi dan Best Practices',
+      'Tren dan Perkembangan Terkini',
+      'Ujian Akhir Semester'
+    ];
+
+    function createAppStructure() {
+      const app = document.getElementById('app');
+      
+      app.innerHTML = `
+        <div class="app-container w-full min-h-full" style="background: ${defaultConfig.background_color};">
+          <div id="home-view"></div>
+          <div id="detail-view" style="display: none;"></div>
+        </div>
+      `;
+
+      renderHomeView(defaultConfig);
+    }
+
+    function renderHomeView(config) {
+      const homeView = document.getElementById('home-view');
+      homeView.innerHTML = `
+        <div class="max-w-7xl mx-auto px-6 py-12">
+          <div style="display: flex; justify-content: flex-end; margin-bottom: 20px;">
+            <button id="profile-btn" style="display: flex; align-items: center; gap: 10px; padding: 10px 20px; background: ${config.surface_color || defaultConfig.surface_color}; border: 2px solid ${config.primary_action_color || defaultConfig.primary_action_color}40; border-radius: 12px; cursor: pointer; transition: all 0.3s;" onmouseover="this.style.borderColor='${config.primary_action_color || defaultConfig.primary_action_color}'; this.style.transform='translateY(-2px)'" onmouseout="this.style.borderColor='${config.primary_action_color || defaultConfig.primary_action_color}40'; this.style.transform='translateY(0)'">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="${config.primary_action_color || defaultConfig.primary_action_color}" stroke-width="2">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                <circle cx="12" cy="7" r="4"></circle>
+              </svg>
+              <span style="color: ${config.text_color || defaultConfig.text_color}; font-family: ${config.font_family || defaultConfig.font_family}, sans-serif; font-size: ${(config.font_size || defaultConfig.font_size) * 0.875}px; font-weight: 600;">Profil</span>
+            </button>
+          </div>
+
+          <header class="text-center mb-16">
+            <h1 id="page-title" class="mb-3" style="color: ${config.text_color || defaultConfig.text_color}; font-family: ${config.font_family || defaultConfig.font_family}, sans-serif; font-size: ${(config.font_size || defaultConfig.font_size) * 2.5}px; font-weight: 800; letter-spacing: -0.02em;">${config.page_title || defaultConfig.page_title}</h1>
+            <p id="page-subtitle" style="color: ${config.text_color || defaultConfig.text_color}; opacity: 0.7; font-family: ${config.font_family || defaultConfig.font_family}, sans-serif; font-size: ${(config.font_size || defaultConfig.font_size) * 1.125}px; font-weight: 500;">${config.page_subtitle || defaultConfig.page_subtitle}</p>
+          </header>
+
+          <div id="courses-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6"></div>
+        </div>
+      `;
+
+      updateCoursesGrid(config);
+
+      // Add profile button click handler
+      document.getElementById('profile-btn').addEventListener('click', () => {
+        showProfileModal(config);
+      });
+    }
+
+    function renderDetailView(config, courseIndex) {
+      const detailView = document.getElementById('detail-view');
+      const courseName = config[`course_${courseIndex + 1}_name`] || defaultConfig[`course_${courseIndex + 1}_name`];
+      
+      detailView.innerHTML = `
+        <div class="max-w-7xl mx-auto px-6 py-12">
+          <button id="back-btn" class="flex items-center gap-2 mb-8 px-4 py-2 rounded-lg transition-all" style="background: ${config.surface_color || defaultConfig.surface_color}; color: ${config.text_color || defaultConfig.text_color}; font-family: ${config.font_family || defaultConfig.font_family}, sans-serif; font-size: ${(config.font_size || defaultConfig.font_size) * 0.875}px; font-weight: 600;" onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='1'">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M19 12H5M12 19l-7-7 7-7"/>
+            </svg>
+            Kembali
+          </button>
+
+          <div class="mb-12">
+            <div class="flex items-center gap-4 mb-4">
+              <div style="color: ${config.primary_action_color || defaultConfig.primary_action_color};">
+                ${courseIcons[courseIndex]}
+              </div>
+              <div>
+                <h1 id="detail-course-name" style="color: ${config.text_color || defaultConfig.text_color}; font-family: ${config.font_family || defaultConfig.font_family}, sans-serif; font-size: ${(config.font_size || defaultConfig.font_size) * 2}px; font-weight: 800; margin-bottom: 4px;">${courseName}</h1>
+                <p style="color: ${config.text_color || defaultConfig.text_color}; opacity: 0.6; font-family: ${config.font_family || defaultConfig.font_family}, sans-serif; font-size: ${(config.font_size || defaultConfig.font_size) * 1}px;">3 SKS • 14 Pertemuan</p>
+              </div>
+            </div>
+          </div>
+
+          <div id="meetings-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+        </div>
+      `;
+
+      updateMeetingsGrid(config);
+
+      document.getElementById('back-btn').addEventListener('click', () => {
+        showHomeView(config);
+      });
+    }
+
+    function updateCoursesGrid(config) {
+      const grid = document.getElementById('courses-grid');
+      if (!grid) return;
+
+      const courses = [
+        config.course_1_name || defaultConfig.course_1_name,
+        config.course_2_name || defaultConfig.course_2_name,
+        config.course_3_name || defaultConfig.course_3_name,
+        config.course_4_name || defaultConfig.course_4_name,
+        config.course_5_name || defaultConfig.course_5_name,
+        config.course_6_name || defaultConfig.course_6_name,
+        config.course_7_name || defaultConfig.course_7_name,
+        config.course_8_name || defaultConfig.course_8_name
+      ];
+
+      grid.innerHTML = courses.map((course, index) => `
+        <div class="course-card rounded-2xl p-6 cursor-pointer" style="background: ${config.surface_color || defaultConfig.surface_color};" data-course-index="${index}">
+          <div class="mb-4" style="color: ${config.primary_action_color || defaultConfig.primary_action_color};">
+            ${courseIcons[index]}
+          </div>
+          <h3 class="course-name" style="color: ${config.text_color || defaultConfig.text_color}; font-family: ${config.font_family || defaultConfig.font_family}, sans-serif; font-size: ${(config.font_size || defaultConfig.font_size) * 1.125}px; font-weight: 700; margin-bottom: 8px; line-height: 1.4;">${course}</h3>
+          <p style="color: ${config.text_color || defaultConfig.text_color}; opacity: 0.6; font-family: ${config.font_family || defaultConfig.font_family}, sans-serif; font-size: ${(config.font_size || defaultConfig.font_size) * 0.875}px; margin-bottom: 16px;">3 SKS • 14 Pertemuan</p>
+          <button class="view-btn w-full rounded-lg py-2.5 px-4 font-semibold transition-all" style="background: ${config.primary_action_color || defaultConfig.primary_action_color}; color: ${config.background_color || defaultConfig.background_color}; font-family: ${config.font_family || defaultConfig.font_family}, sans-serif; font-size: ${(config.font_size || defaultConfig.font_size) * 0.875}px;" onmouseover="this.style.opacity='0.9'" onmouseout="this.style.opacity='1'">Lihat Detail</button>
+        </div>
+      `).join('');
+
+      // Add click handlers
+      document.querySelectorAll('.course-card').forEach(card => {
+        card.addEventListener('click', () => {
+          const courseIndex = parseInt(card.dataset.courseIndex);
+          showDetailView(config, courseIndex);
+        });
+      });
+    }
+
+    function updateMeetingsGrid(config) {
+      const grid = document.getElementById('meetings-grid');
+      if (!grid) return;
+
+      grid.innerHTML = meetingTopics.map((topic, index) => `
+        <div class="meeting-card rounded-xl p-5 transition-all" style="background: ${config.surface_color || defaultConfig.surface_color}; border: 2px solid transparent;">
+          <div class="flex items-start gap-4">
+            <div class="flex-shrink-0 w-12 h-12 rounded-lg flex items-center justify-center" style="background: ${config.primary_action_color || defaultConfig.primary_action_color}20;">
+              <span style="color: ${config.primary_action_color || defaultConfig.primary_action_color}; font-family: ${config.font_family || defaultConfig.font_family}, sans-serif; font-size: ${(config.font_size || defaultConfig.font_size) * 1.125}px; font-weight: 800;">${index + 1}</span>
+            </div>
+            <div class="flex-1">
+              <h3 class="meeting-title mb-2" style="color: ${config.text_color || defaultConfig.text_color}; font-family: ${config.font_family || defaultConfig.font_family}, sans-serif; font-size: ${(config.font_size || defaultConfig.font_size) * 1}px; font-weight: 700; line-height: 1.4;">Pertemuan ${index + 1}</h3>
+              <p class="meeting-topic" style="color: ${config.text_color || defaultConfig.text_color}; opacity: 0.7; font-family: ${config.font_family || defaultConfig.font_family}, sans-serif; font-size: ${(config.font_size || defaultConfig.font_size) * 0.875}px; line-height: 1.5;">${topic}</p>
+            </div>
+          </div>
+        </div>
+      `).join('');
+
+      // Meeting cards are display only, no click handlers needed
+    }
+
+    function showProfileModal(config) {
+      const modal = document.createElement('div');
+      modal.id = 'profile-modal';
+      modal.style.cssText = 'position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 1000; display: flex; align-items: center; justify-content: center; padding: 20px;';
+      
+      const modalContent = document.createElement('div');
+      modalContent.style.cssText = `background: ${config.surface_color || defaultConfig.surface_color}; border-radius: 20px; max-width: 500px; width: 100%; position: relative; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);`;
+      
+      modalContent.innerHTML = `
+        <div style="padding: 32px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+            <h2 style="color: ${config.text_color || defaultConfig.text_color}; font-family: ${config.font_family || defaultConfig.font_family}, sans-serif; font-size: ${(config.font_size || defaultConfig.font_size) * 1.75}px; font-weight: 700;">Profil Mahasiswa</h2>
+            <button id="close-profile-modal" style="background: ${config.primary_action_color || defaultConfig.primary_action_color}20; color: ${config.text_color || defaultConfig.text_color}; border: none; width: 36px; height: 36px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s;" onmouseover="this.style.background='${config.primary_action_color || defaultConfig.primary_action_color}30'" onmouseout="this.style.background='${config.primary_action_color || defaultConfig.primary_action_color}20'">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <line x1="18" y1="6" x2="6" y2="18"></line>
+                <line x1="6" y1="6" x2="18" y2="18"></line>
+              </svg>
+            </button>
+          </div>
+
+          <div style="display: flex; justify-content: center; margin-bottom: 24px;">
+            <div style="width: 100px; height: 100px; border-radius: 50%; background: ${config.primary_action_color || defaultConfig.primary_action_color}20; display: flex; align-items: center; justify-content: center; border: 4px solid ${config.primary_action_color || defaultConfig.primary_action_color};">
+              <svg width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="${config.primary_action_color || defaultConfig.primary_action_color}" stroke-width="2">
+                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                <circle cx="12" cy="7" r="4"></circle>
+              </svg>
+            </div>
+          </div>
+
+          <div style="background: ${config.background_color || defaultConfig.background_color}; border-radius: 12px; padding: 20px; margin-bottom: 16px;">
+            <div style="margin-bottom: 16px;">
+              <label style="display: block; color: ${config.text_color || defaultConfig.text_color}; opacity: 0.6; font-family: ${config.font_family || defaultConfig.font_family}, sans-serif; font-size: ${(config.font_size || defaultConfig.font_size) * 0.8125}px; font-weight: 600; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.05em;">Nama</label>
+              <p style="color: ${config.text_color || defaultConfig.text_color}; font-family: ${config.font_family || defaultConfig.font_family}, sans-serif; font-size: ${(config.font_size || defaultConfig.font_size) * 1.125}px; font-weight: 600;">Daniel Karel</p>
+            </div>
+
+            <div style="margin-bottom: 16px;">
+              <label style="display: block; color: ${config.text_color || defaultConfig.text_color}; opacity: 0.6; font-family: ${config.font_family || defaultConfig.font_family}, sans-serif; font-size: ${(config.font_size || defaultConfig.font_size) * 0.8125}px; font-weight: 600; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.05em;">NIM</label>
+              <p style="color: ${config.text_color || defaultConfig.text_color}; font-family: ${config.font_family || defaultConfig.font_family}, sans-serif; font-size: ${(config.font_size || defaultConfig.font_size) * 1.125}px; font-weight: 600;">231011402025</p>
+            </div>
+
+            <div>
+              <label style="display: block; color: ${config.text_color || defaultConfig.text_color}; opacity: 0.6; font-family: ${config.font_family || defaultConfig.font_family}, sans-serif; font-size: ${(config.font_size || defaultConfig.font_size) * 0.8125}px; font-weight: 600; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.05em;">Kelas</label>
+              <p style="color: ${config.text_color || defaultConfig.text_color}; font-family: ${config.font_family || defaultConfig.font_family}, sans-serif; font-size: ${(config.font_size || defaultConfig.font_size) * 1.125}px; font-weight: 600;">05TPLE009</p>
+            </div>
+          </div>
+
+          <div style="padding: 16px; background: ${config.primary_action_color || defaultConfig.primary_action_color}15; border-radius: 8px; border-left: 4px solid ${config.primary_action_color || defaultConfig.primary_action_color};">
+            <p style="color: ${config.text_color || defaultConfig.text_color}; font-family: ${config.font_family || defaultConfig.font_family}, sans-serif; font-size: ${(config.font_size || defaultConfig.font_size) * 0.8125}px; line-height: 1.6;">
+              <strong style="font-weight: 700;">Program Studi:</strong> Teknik Informatika<br>
+              <strong style="font-weight: 700;">Status:</strong> Mahasiswa Aktif
+            </p>
+          </div>
+        </div>
+      `;
+
+      modal.appendChild(modalContent);
+      document.body.appendChild(modal);
+
+      // Close modal handler
+      document.getElementById('close-profile-modal').addEventListener('click', () => {
+        modal.remove();
+      });
+
+      modal.addEventListener('click', (e) => {
+        if (e.target === modal) {
+          modal.remove();
+        }
+      });
+    }
+
+    function showHomeView(config) {
+      currentView = 'home';
+      document.getElementById('home-view').style.display = 'block';
+      document.getElementById('detail-view').style.display = 'none';
+      renderHomeView(config);
+    }
+
+    function showDetailView(config, courseIndex) {
+      currentView = 'detail';
+      selectedCourseIndex = courseIndex;
+      document.getElementById('home-view').style.display = 'none';
+      document.getElementById('detail-view').style.display = 'block';
+      renderDetailView(config, courseIndex);
+    }
+
+    async function onConfigChange(config) {
+      const appContainer = document.querySelector('.app-container');
+
+      const backgroundColor = config.background_color || defaultConfig.background_color;
+      const surfaceColor = config.surface_color || defaultConfig.surface_color;
+      const textColor = config.text_color || defaultConfig.text_color;
+      const primaryColor = config.primary_action_color || defaultConfig.primary_action_color;
+      const fontFamily = config.font_family || defaultConfig.font_family;
+      const baseFontSize = config.font_size || defaultConfig.font_size;
+
+      appContainer.style.background = backgroundColor;
+
+      if (currentView === 'home') {
+        const pageTitle = document.getElementById('page-title');
+        const pageSubtitle = document.getElementById('page-subtitle');
+
+        if (pageTitle) {
+          pageTitle.textContent = config.page_title || defaultConfig.page_title;
+          pageTitle.style.color = textColor;
+          pageTitle.style.fontFamily = `${fontFamily}, sans-serif`;
+          pageTitle.style.fontSize = `${baseFontSize * 2.5}px`;
+        }
+
+        if (pageSubtitle) {
+          pageSubtitle.textContent = config.page_subtitle || defaultConfig.page_subtitle;
+          pageSubtitle.style.color = textColor;
+          pageSubtitle.style.fontFamily = `${fontFamily}, sans-serif`;
+          pageSubtitle.style.fontSize = `${baseFontSize * 1.125}px`;
+        }
+
+        const courseCards = document.querySelectorAll('.course-card');
+        courseCards.forEach(card => {
+          card.style.background = surfaceColor;
+        });
+
+        const courseNames = document.querySelectorAll('.course-name');
+        courseNames.forEach((name, index) => {
+          const courseKey = `course_${index + 1}_name`;
+          name.textContent = config[courseKey] || defaultConfig[courseKey];
+          name.style.color = textColor;
+          name.style.fontFamily = `${fontFamily}, sans-serif`;
+          name.style.fontSize = `${baseFontSize * 1.125}px`;
+        });
+
+        const courseIcons = document.querySelectorAll('.course-icon');
+        courseIcons.forEach(icon => {
+          icon.style.color = primaryColor;
+        });
+
+        const viewButtons = document.querySelectorAll('.view-btn');
+        viewButtons.forEach(btn => {
+          btn.style.background = primaryColor;
+          btn.style.color = backgroundColor;
+          btn.style.fontFamily = `${fontFamily}, sans-serif`;
+          btn.style.fontSize = `${baseFontSize * 0.875}px`;
+        });
+
+        const descriptions = document.querySelectorAll('.course-card p');
+        descriptions.forEach(desc => {
+          desc.style.color = textColor;
+          desc.style.fontFamily = `${fontFamily}, sans-serif`;
+          desc.style.fontSize = `${baseFontSize * 0.875}px`;
+        });
+      } else if (currentView === 'detail') {
+        const backBtn = document.getElementById('back-btn');
+        const detailCourseName = document.getElementById('detail-course-name');
+
+        if (backBtn) {
+          backBtn.style.background = surfaceColor;
+          backBtn.style.color = textColor;
+          backBtn.style.fontFamily = `${fontFamily}, sans-serif`;
+          backBtn.style.fontSize = `${baseFontSize * 0.875}px`;
+        }
+
+        if (detailCourseName) {
+          const courseName = config[`course_${selectedCourseIndex + 1}_name`] || defaultConfig[`course_${selectedCourseIndex + 1}_name`];
+          detailCourseName.textContent = courseName;
+          detailCourseName.style.color = textColor;
+          detailCourseName.style.fontFamily = `${fontFamily}, sans-serif`;
+          detailCourseName.style.fontSize = `${baseFontSize * 2}px`;
+        }
+
+        const meetingCards = document.querySelectorAll('.meeting-card');
+        meetingCards.forEach(card => {
+          card.style.background = surfaceColor;
+        });
+
+        const meetingTitles = document.querySelectorAll('.meeting-title');
+        meetingTitles.forEach(title => {
+          title.style.color = textColor;
+          title.style.fontFamily = `${fontFamily}, sans-serif`;
+          title.style.fontSize = `${baseFontSize * 1}px`;
+        });
+
+        const meetingTopics = document.querySelectorAll('.meeting-topic');
+        meetingTopics.forEach(topic => {
+          topic.style.color = textColor;
+          topic.style.fontFamily = `${fontFamily}, sans-serif`;
+          topic.style.fontSize = `${baseFontSize * 0.875}px`;
+        });
+      }
+    }
+
+    createAppStructure();
+
+    if (window.elementSdk) {
+      window.elementSdk.init({
+        defaultConfig,
+        onConfigChange,
+        mapToCapabilities: (config) => ({
+          recolorables: [
+            {
+              get: () => config.background_color || defaultConfig.background_color,
+              set: (value) => {
+                config.background_color = value;
+                window.elementSdk.setConfig({ background_color: value });
+              }
+            },
+            {
+              get: () => config.surface_color || defaultConfig.surface_color,
+              set: (value) => {
+                config.surface_color = value;
+                window.elementSdk.setConfig({ surface_color: value });
+              }
+            },
+            {
+              get: () => config.text_color || defaultConfig.text_color,
+              set: (value) => {
+                config.text_color = value;
+                window.elementSdk.setConfig({ text_color: value });
+              }
+            },
+            {
+              get: () => config.primary_action_color || defaultConfig.primary_action_color,
+              set: (value) => {
+                config.primary_action_color = value;
+                window.elementSdk.setConfig({ primary_action_color: value });
+              }
+            }
+          ],
+          borderables: [],
+          fontEditable: {
+            get: () => config.font_family || defaultConfig.font_family,
+            set: (value) => {
+              config.font_family = value;
+              window.elementSdk.setConfig({ font_family: value });
+            }
+          },
+          fontSizeable: {
+            get: () => config.font_size || defaultConfig.font_size,
+            set: (value) => {
+              config.font_size = value;
+              window.elementSdk.setConfig({ font_size: value });
+            }
+          }
+        }),
+        mapToEditPanelValues: (config) => new Map([
+          ['page_title', config.page_title || defaultConfig.page_title],
+          ['page_subtitle', config.page_subtitle || defaultConfig.page_subtitle],
+          ['course_1_name', config.course_1_name || defaultConfig.course_1_name],
+          ['course_2_name', config.course_2_name || defaultConfig.course_2_name],
+          ['course_3_name', config.course_3_name || defaultConfig.course_3_name],
+          ['course_4_name', config.course_4_name || defaultConfig.course_4_name],
+          ['course_5_name', config.course_5_name || defaultConfig.course_5_name],
+          ['course_6_name', config.course_6_name || defaultConfig.course_6_name],
+          ['course_7_name', config.course_7_name || defaultConfig.course_7_name],
+          ['course_8_name', config.course_8_name || defaultConfig.course_8_name]
+        ])
+      });
+    }
+  </script>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9babe3dd26c16bfa',t:'MTc2Nzg3NzM1NS4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
